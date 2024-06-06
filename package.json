@@ -1,0 +1,18 @@
+{
+  "name": "tuboaou",
+  "version": "1.0.0",
+  "description": "Nous nous sommes tous déjà retrouvés dans cette situation avec nos amis : Dans quel bar on se retrouve ? Quel est le bar le plus proche pour tout le monde ? Je ne peux pas venir, c'est trop loin pour moi ? Y-a-t'il un évènement proche de ce bar auquel nous pourrions aller après ?",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon backend/index.js",
+    "start": "node backend/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "nodemon": "^3.1.3"
+  }
+}
