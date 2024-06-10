@@ -4,28 +4,25 @@ import { errorHandler } from '../utils/error.js';
 
 export const signup = async (req, res, next) => {
     // console.log(req.body);
-    const { email, username, password } = req.body;
+    const { username, email, password } = req.body;
 
     if (
-        !email ||
-        !email.includes('@') ||
-        email === '' ||
         !username ||
-        username.length < 3 ||
         username === '' ||
+        !email ||
+        email === '' ||
         !password ||
-        password.length < 6 ||
         password === ''
 
     ) {
         next(errorHandler(400, 'All fields are required, username & password must be at least 3 & 6 characters long'));
     }
 
-    const hashedPassword = bcryptjs.hashSync(password, 12);
+    const hashedPassword = bcryptjs.hashSync(password, 10);
 
     const newUser = new User({
-        email,
         username,
+        email,
         password: hashedPassword,
     });
     try {
