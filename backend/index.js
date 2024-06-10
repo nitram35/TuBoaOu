@@ -3,8 +3,10 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
+
 mongoose
     .connect(process.env.MONGODB_URI)
     .then(() => {
@@ -17,6 +19,8 @@ mongoose
 const app = express();
 // allow json as input to the server
 app.use(express.json());
+// allow cookies to be parsed by the server (useful in verifyUser.js to verify the token)
+app.use(cookieParser());
 
 app.listen(3000, () => {
     console.log('Our server is running on http://localhost:3000');
