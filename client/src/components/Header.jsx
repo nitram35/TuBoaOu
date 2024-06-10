@@ -1,4 +1,3 @@
-import React from 'react';
 import { Navbar, TextInput, Button, Dropdown, Avatar } from 'flowbite-react';
 import { Link, useLocation } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
