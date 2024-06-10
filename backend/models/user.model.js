@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     profileAvatar: {
         type: String,
-        default: "https://static.wikia.nocookie.net/movie-heroes-and-villains/images/e/e8/Jake_Sully.png/revision/latest?cb=20230819025438",
+        default: "https://media.istockphoto.com/id/1495088043/fr/vectoriel/ic%C3%B4ne-de-profil-utilisateur-avatar-ou-ic%C3%B4ne-de-personne-photo-de-profil-symbole-portrait.jpg?s=612x612&w=0&k=20&c=moNRZjYtVpH-I0mAe-ZfjVkuwgCOqH-BRXFLhQkZoP8=",
     },
 }, { timestamps: true });
 
