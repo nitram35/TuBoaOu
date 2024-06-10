@@ -38,9 +38,9 @@ export default function Header() {
                         Group
                     </Link>
                 </Navbar.Link>
-                <Navbar.Link active={path === '/sign-in'} as={'div'}>
-                    <Link to='/sign-in'>
-                        Sign In
+                <Navbar.Link active={path === '/other'} as={'div'}>
+                    <Link to='/other'>
+                        Other
                     </Link>
                 </Navbar.Link>
             </Navbar.Collapse>
