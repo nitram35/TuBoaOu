@@ -1,7 +1,7 @@
 import { Alert, Button, Modal, TextInput } from 'flowbite-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState } from 'react';
-import { updateStart, updateSucceeded, updateFailed, deleteUserStart, deleteUserSucceeded, deleteUserFailed } from '../redux/user/userSlice';
+import { updateStart, updateSucceeded, updateFailed, deleteUserStart, deleteUserSucceeded, deleteUserFailed, signoutSucceeded } from '../redux/user/userSlice';
 
 export default function DashboardProfile() {
     const { currentUser, error } = useSelector(state => state.user);
@@ -71,6 +71,21 @@ export default function DashboardProfile() {
             dispatch(deleteUserFailed(error.message));
         }
     };
+    const handleSignout = async () => {
+        try {
+            const response = await fetch('/api/user/signout', {
+                method: 'POST',
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                console.log(data.message);
+            } else {
+                dispatch(signoutSucceeded());
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
     return (
         <div className='max-w-lg mx-auto p-3 w-full'>
             <h1 className='my-7 text-center font-semibold text-3xl'>Profile</h1>
@@ -87,7 +102,7 @@ export default function DashboardProfile() {
             </form>
             <div className='text-red-600 flex justify-between mt-5'>
                 <span className='cursor-pointer' onClick={() => setShowModal(true)}>Delete Account</span>
-                <span className='cursor-pointer'>Sign Out</span>
+                <span className='cursor-pointer' onClick={handleSignout}>Sign Out</span>
             </div>
             {updateUserSucceeded && (<Alert color='success' className='mt-2'>{updateUserSucceeded}</Alert>)}
             {updateUserError && (<Alert color='failure' className='mt-2'>{updateUserError}</Alert>)}
