@@ -151,7 +151,7 @@ This command will start the backend server, and it will listen for incoming requ
 
 * **GANDON Martin** - [Github](https://github.com/nitram35)
 * **SIMONOVICI Enzo**
-* **Bekom Jordan**
+* **BELOM Jordan**
 
 ## License
 
