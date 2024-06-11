@@ -1,4 +1,4 @@
-import { Button, TextInput } from 'flowbite-react';
+import { Alert, Button, TextInput } from 'flowbite-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState } from 'react';
 import { updateStart, updateSucceeded, updateFailed } from '../redux/user/userSlice';
@@ -6,6 +6,8 @@ import { updateStart, updateSucceeded, updateFailed } from '../redux/user/userSl
 export default function DashboardProfile() {
     const { currentUser } = useSelector(state => state.user);
     const [formData, setFormData] = useState({});
+    const [updateUserSucceeded, setUpdateUserSucceeded] = useState(null);
+    const [updateUserError, setUpdateUserError] = useState(null);
     const dispatch = useDispatch();
 
     const handleChange = (e) => {
@@ -14,28 +16,37 @@ export default function DashboardProfile() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // reset the alert messages
+        setUpdateUserSucceeded(null);
+        setUpdateUserError(null);
         // if no data is changed, return
         if (Object.keys(formData).length === 0) {
+            setUpdateUserError("No data updated!");
             return;
         }
         try {
             dispatch(updateStart());
             // make a request to the server
-            const res = await fetch(`/api/user/update/${currentUser._id}`, {
+            const response = await fetch(`/api/user/update/${currentUser._id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData),
             });
-            const data = await res.json();
-            if (!res.ok) {
+            const data = await response.json();
+            if (!response.ok) {
                 dispatch(updateFailed(data.message));
+                setUpdateUserError(data.message);
+
             } else {
                 dispatch(updateSucceeded(data));
+                setUpdateUserSucceeded("Profile updated successfully!");
             }
         } catch (error) {
             dispatch(updateFailed(error.message));
+            setUpdateUserError(error.message);
+
         }
 
     };
@@ -59,6 +70,8 @@ export default function DashboardProfile() {
                 <span className='cursor-pointer'>Delete Account</span>
                 <span className='cursor-pointer'>Sign Out</span>
             </div>
+            {updateUserSucceeded && (<Alert color='success' className='mt-2'>{updateUserSucceeded}</Alert>)}
+            {updateUserError && (<Alert color='failure' className='mt-2'>{updateUserError}</Alert>)}
         </div>
     )
 }
