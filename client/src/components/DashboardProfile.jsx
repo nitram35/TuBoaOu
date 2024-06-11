@@ -1,13 +1,14 @@
-import { Alert, Button, TextInput } from 'flowbite-react';
+import { Alert, Button, Modal, TextInput } from 'flowbite-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState } from 'react';
-import { updateStart, updateSucceeded, updateFailed } from '../redux/user/userSlice';
+import { updateStart, updateSucceeded, updateFailed, deleteUserStart, deleteUserSucceeded, deleteUserFailed } from '../redux/user/userSlice';
 
 export default function DashboardProfile() {
-    const { currentUser } = useSelector(state => state.user);
+    const { currentUser, error } = useSelector(state => state.user);
     const [formData, setFormData] = useState({});
     const [updateUserSucceeded, setUpdateUserSucceeded] = useState(null);
     const [updateUserError, setUpdateUserError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     const dispatch = useDispatch();
 
     const handleChange = (e) => {
@@ -52,6 +53,24 @@ export default function DashboardProfile() {
     };
     // console.log(currentUser);
     // console.log(formData);
+
+    const handleDeleteUser = async () => {
+        setShowModal(false);
+        try {
+            dispatch(deleteUserStart());
+            const response = await fetch(`/api/user/delete/${currentUser._id}`, {
+                method: 'DELETE',
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                dispatch(deleteUserFailed(data.message));
+            } else {
+                dispatch(deleteUserSucceeded(data));
+            }
+        } catch (error) {
+            dispatch(deleteUserFailed(error.message));
+        }
+    };
     return (
         <div className='max-w-lg mx-auto p-3 w-full'>
             <h1 className='my-7 text-center font-semibold text-3xl'>Profile</h1>
@@ -67,11 +86,25 @@ export default function DashboardProfile() {
                 </Button>
             </form>
             <div className='text-red-600 flex justify-between mt-5'>
-                <span className='cursor-pointer'>Delete Account</span>
+                <span className='cursor-pointer' onClick={() => setShowModal(true)}>Delete Account</span>
                 <span className='cursor-pointer'>Sign Out</span>
             </div>
             {updateUserSucceeded && (<Alert color='success' className='mt-2'>{updateUserSucceeded}</Alert>)}
             {updateUserError && (<Alert color='failure' className='mt-2'>{updateUserError}</Alert>)}
+            {error && (<Alert color='failure' className='mt-2'>{error}</Alert>)}
+            <Modal popup size='md' show={showModal} onClose={() => setShowModal(false)}>
+                <Modal.Header />
+                <Modal.Body>
+                    <div className='text-center'>
+                        <h1 className='font-semibold text-lg'>Are you sure you want to delete your account?</h1>
+                        <div className='flex justify-between mt-5'>
+                            <Button color='failure' onClick={handleDeleteUser}>Yes, sure!</Button>
+                            <Button gradientDuoTone='greenToBlue' outline onClick={() => setShowModal(false)}>No, cancel</Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+
+            </Modal>
         </div>
     )
 }
