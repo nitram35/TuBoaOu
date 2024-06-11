@@ -17,7 +17,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 Before running the application, make sure you have the following installed:
 -   Node.js
--   MongoDB or **MongoDB Atlas account** by going on the MongoDB website and signing up for a new account.
+-   MongoDB or **MongoDB Atlas account** by going on the MongoDB website and signing up for a new account (optionnal for the team).
 
 ### Installation
 
