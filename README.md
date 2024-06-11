@@ -99,6 +99,7 @@ In the .env add an environment variable:
 
 `JWT_SECRET  =  'whateverYouWant'`
 Replace "whateverYouWant" with **Whatever You Want**.
+
 If doesn't work try this (I'm sure it's working) :
 `JWT_SECRET  =  'martingdn'`
 
