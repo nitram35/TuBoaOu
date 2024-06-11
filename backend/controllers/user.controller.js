@@ -7,7 +7,7 @@ export const test = (req, res) => {
 };
 
 export const updateUser = async (req, res, next) => {
-    if (req.user.userId !== req.params._userId) {
+    if (req.user.id !== req.params.userId) {
         return next(errorHandler(403, 'Forbidden to update this user'));
     }
     if (req.body.password) {
@@ -31,7 +31,7 @@ export const updateUser = async (req, res, next) => {
         }
         try {
             const updatedUser = await User.findByIdAndUpdate(
-                req.params._userId,
+                req.params.userId,
                 {
                     $set: {
                         username: req.body.username,

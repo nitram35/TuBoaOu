@@ -55,7 +55,7 @@ export const signin = async (req, res, next) => {
         }
         // If everything is correct we are going to create a token for the user
         const token = jwt.sign(
-            { userId: validUser._id },
+            { id: validUser._id },
             process.env.JWT_SECRET
         );
         // We don't want to send the password back even if it's hashed
@@ -76,7 +76,7 @@ export const google = async (req, res, next) => {
     try {
         const user = await User.findOne({ email });
         if (user) {
-            const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
             const { password, ...rest } = user._doc;
             res.status(200).cookie('access_token', token, {
                 httpOnly: true
@@ -91,7 +91,7 @@ export const google = async (req, res, next) => {
                 profileAvatar: googlePhotoUrl,
             });
             await newUser.save();
-            const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET);
+            const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
             const { password, ...rest } = newUser._doc;
             res.status(200).cookie('access_token', token, {
                 httpOnly: true
