@@ -82,7 +82,7 @@ This command will start the frontend server, and you'll be able to access the we
 
   This file will store environment variables for the project to run.
 
-#### Step 7: Update MongoDB URI
+##### Step 6.1: Add MongoDB URI
 
 In the .env create an environment variable:
 
@@ -93,7 +93,16 @@ Jordan : `MONGODB_URI = 'mongodb+srv://jordanblm:jordanblm@tuboaou.krsxbcv.mongo
 
 Enzo : `MONGODB_URI = 'mongodb+srv://enzosmi:enzosmi@tuboaou.krsxbcv.mongodb.net/tuboaou?retryWrites=true&w=majority&appName=TuBoaOu'`
 
-#### Step : Install Backend Dependencies
+##### Step 6.2: Add JWT key
+
+In the .env add an environment variable:
+
+`JWT_SECRET  =  'whateverYouWant'`
+Replace "whateverYouWant" with **Whatever You Want**.
+If doesn't work try this (I'm sure it's working) :
+`JWT_SECRET  =  'martingdn'`
+
+#### Step 7: Install Backend Dependencies
 
 In a **new terminal**, navigate to the **root** directory
 
@@ -109,7 +118,7 @@ npm install
 
 This command will install all the required packages specified in the package.json file.
 
-#### Step : Run the Backend Server
+#### Step 8: Run the Backend Server
 
 In the same terminal, run the following command to start the backend server:
 
