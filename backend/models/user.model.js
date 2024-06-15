@@ -17,7 +17,11 @@ const userSchema = new mongoose.Schema({
     },
     profileAvatar: {
         type: String,
-        default: "https://media.istockphoto.com/id/1495088043/fr/vectoriel/ic%C3%B4ne-de-profil-utilisateur-avatar-ou-ic%C3%B4ne-de-personne-photo-de-profil-symbole-portrait.jpg?s=612x612&w=0&k=20&c=moNRZjYtVpH-I0mAe-ZfjVkuwgCOqH-BRXFLhQkZoP8=",
+        default: "https://img.freepik.com/psd-gratuit/illustration-3d-avatar-profil-humain_23-2150671142.jpg?size=338&ext=jpg&ga=GA1.1.1788614524.1718150400&semt=sph",
+    },
+    address: {
+        type: String,
+        default: "",
     },
 }, { timestamps: true });
 

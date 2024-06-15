@@ -18,8 +18,8 @@ export default function DashboardProfile() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         // reset the alert messages
-        setUpdateUserSucceeded(null);
         setUpdateUserError(null);
+        setUpdateUserSucceeded(null);
         // if no data is changed, return
         if (Object.keys(formData).length === 0) {
             setUpdateUserError("No data updated!");
@@ -37,15 +37,15 @@ export default function DashboardProfile() {
             });
             const data = await response.json();
             if (!response.ok) {
-                dispatch(updateFailed(data.message));
+                // dispatch(updateFailed(data.message));
                 setUpdateUserError(data.message);
 
             } else {
-                dispatch(updateSucceeded(data));
+                // dispatch(updateSucceeded(data));
                 setUpdateUserSucceeded("Profile updated successfully!");
             }
         } catch (error) {
-            dispatch(updateFailed(error.message));
+            // dispatch(updateFailed(error.message));
             setUpdateUserError(error.message);
 
         }
@@ -96,6 +96,7 @@ export default function DashboardProfile() {
                 <TextInput type='text' id='username' placeholder='username' defaultValue={currentUser.username} onChange={handleChange} />
                 <TextInput type='email' id='email' placeholder='email' defaultValue={currentUser.email} onChange={handleChange} />
                 <TextInput type='password' id='password' placeholder='password' onChange={handleChange} />
+                <TextInput type='text' id='address' placeholder='address' defaultValue={currentUser.address} onChange={handleChange} />
                 <Button type='submit' gradientDuoTone='greenToBlue' outline>
                     Update
                 </Button>
@@ -118,7 +119,6 @@ export default function DashboardProfile() {
                         </div>
                     </div>
                 </Modal.Body>
-
             </Modal>
         </div>
     )

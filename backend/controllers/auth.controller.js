@@ -14,9 +14,15 @@ export const signup = async (req, res, next) => {
         email === '' ||
         !password ||
         password === ''
-
     ) {
-        next(errorHandler(400, 'All fields are required, username & password must be at least 3 & 6 characters long'));
+        return (next(errorHandler(400, 'All fields are required, username & password must be at least 3 & 6 characters long')));
+    }
+    if (
+        username.length < 5 ||
+        username.length > 15 ||
+        password.length < 6
+    ) {
+        return (next(errorHandler(400, 'Username must be between 5 and 15 characters & password must be at least 6 characters long')));
     }
 
     const hashedPassword = bcryptjs.hashSync(password, 10);
