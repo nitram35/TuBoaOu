@@ -37,11 +37,11 @@ export default function DashboardProfile() {
             });
             const data = await response.json();
             if (!response.ok) {
-                // dispatch(updateFailed(data.message));
+                dispatch(updateFailed(data.message));
                 setUpdateUserError(data.message);
 
             } else {
-                // dispatch(updateSucceeded(data));
+                dispatch(updateSucceeded(data));
                 setUpdateUserSucceeded("Profile updated successfully!");
             }
         } catch (error) {
@@ -95,7 +95,7 @@ export default function DashboardProfile() {
                 </div>
                 <TextInput type='text' id='username' placeholder='username' defaultValue={currentUser.username} onChange={handleChange} />
                 <TextInput type='email' id='email' placeholder='email' defaultValue={currentUser.email} onChange={handleChange} />
-                <TextInput type='password' id='password' placeholder='password' onChange={handleChange} />
+                <TextInput type='password' id='password' placeholder='password' defaultValue={currentUser.password} onChange={handleChange} />
                 <TextInput type='text' id='address' placeholder='address' defaultValue={currentUser.address} onChange={handleChange} />
                 <Button type='submit' gradientDuoTone='greenToBlue' outline>
                     Update
