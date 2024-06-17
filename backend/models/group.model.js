@@ -12,10 +12,10 @@ const groupSchema = new mongoose.Schema({
         required: true,
     },
     users: [{
-        // id: {
-        //     type: Schema.Types.ObjectId,
-        //     ref: 'User',
-        // }
+        username: {
+            type: String,
+            required: true,
+        },
         email: {
             type: String,
             required: true,

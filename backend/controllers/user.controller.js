@@ -2,10 +2,6 @@ import User from "../models/user.model.js";
 import { errorHandler } from "../utils/error.js";
 import bcryptjs from "bcryptjs";
 
-export const test = (req, res) => {
-    res.json({ message: "API, user route works" });
-};
-
 export const updateUser = async (req, res, next) => {
     if (req.user.id !== req.params.userId) {
         return next(errorHandler(403, 'You are not allowed to update this user'));
@@ -86,5 +82,15 @@ export const signout = (req, res, next) => {
         res.status(200).json('Signout successful');
     } catch (error) {
         next(error);
+    }
+};
+
+export const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await User.find(); // Fetch all users from database
+
+        res.status(200).json(users); // Send users as JSON response
+    } catch (error) {
+        next(error); // Forward error to error handler middleware
     }
 };
