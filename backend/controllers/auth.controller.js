@@ -4,9 +4,7 @@ import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
 export const signup = async (req, res, next) => {
-    // console.log(req.body);
     const { username, email, password } = req.body;
-
     if (
         !username ||
         username === '' ||
@@ -24,9 +22,7 @@ export const signup = async (req, res, next) => {
     ) {
         return (next(errorHandler(400, 'Username must be between 5 and 15 characters & password must be at least 6 characters long')));
     }
-
     const hashedPassword = bcryptjs.hashSync(password, 10);
-
     const newUser = new User({
         username,
         email,
@@ -38,8 +34,6 @@ export const signup = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-
-
 };
 
 export const signin = async (req, res, next) => {
@@ -47,7 +41,6 @@ export const signin = async (req, res, next) => {
     if (!email || email === '' || !password || password === '') {
         next(errorHandler(400, 'All fields are required'));
     }
-
     try {
         // findOne is going to search for email in the database
         const validUser = await User.findOne({ email });
@@ -66,7 +59,6 @@ export const signin = async (req, res, next) => {
         );
         // We don't want to send the password back even if it's hashed
         const { password: pass, ...rest } = validUser._doc;
-
         // We create a cookie with the token
         res.status(200).cookie('access_token', token, {
             httpOnly: true
@@ -74,7 +66,6 @@ export const signin = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-
 };
 
 export const google = async (req, res, next) => {

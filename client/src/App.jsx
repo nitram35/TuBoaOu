@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home'
-import Group from './pages/Group'
 import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import Header from './components/Header'
@@ -19,10 +18,6 @@ export default function App() {
         <Route element={<PrivateRoute />} >
           <Route path='/dashboard' element={<Dashboard />} />
         </Route>
-
-        <Route path='/group' element={<Group />} />
-
-
       </Routes>
       <Footer />
     </BrowserRouter>
