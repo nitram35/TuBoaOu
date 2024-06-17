@@ -1,75 +1,195 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button, TextInput, Alert, Modal } from 'flowbite-react';
+import { useSelector } from 'react-redux';
 
-function GroupSection({ setSelectedGroup }) {
-  const [groupName, setGroupName] = useState('');
-  const [groupMembers, setGroupMembers] = useState('');
+export default function GroupSection() {
   const [groups, setGroups] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({ name: '', selectedUsers: '' });
+  const [createGroupSuccess, setCreateGroupSuccess] = useState(null);
+  const [createGroupError, setCreateGroupError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { currentUser } = useSelector(state => state.user); // Added to access currentUser from Redux state
 
-  const handleCreateGroup = () => {
-    if (!groupName || !groupMembers) {
-      setError('Tous les champs sont obligatoires.');
-      return;
+  useEffect(() => {
+    fetchGroups();
+
+  }, []);
+  const fetchGroups = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/group');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch groups');
+      }
+      setGroups(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching groups:', error.message);
+      setError(error.message);
+      setLoading(false);
     }
-    setError('');
-    const newGroup = { name: groupName, members: groupMembers.split(',') };
-    setGroups([...groups, newGroup]);
-    setGroupName('');
-    setGroupMembers('');
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value
+    });
+  };
+
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name || !formData.selectedUsers.trim()) {
+      setCreateGroupError('Please fill out all fields.');
+      return;
+    }
+
+    const selectedUserIds = formData.selectedUsers.split(',').map(id => id.trim());
+
+    try {
+      setLoading(true);
+
+      const usersDetails = await fetchUsersDetails(selectedUserIds);
+      const usersArray = usersDetails.map(user => ({
+        username: user.username,
+        email: user.email,
+        longitude: user.longitude,
+        latitude: user.latitude
+      }));
+
+      const response = await fetch('/api/group/createGroup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ownerId: currentUser._id,
+          groupName: formData.name,
+          users: usersArray
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create group');
+      }
+
+      const newGroup = {
+        _id: data._id,
+        groupName: data.groupName,
+        users: data.users,
+        ownerId: data.ownerId
+      };
+
+      setGroups([...groups, newGroup]);
+      setCreateGroupSuccess('Group created successfully!');
+      setFormData({ name: '', selectedUsers: '' });
+      setLoading(false);
+    } catch (error) {
+      console.error('Error creating group:', error.message);
+      setCreateGroupError('Failed to create group. Please try again.');
+      setLoading(false);
+    }
+  };
+
+
+  const fetchUsersDetails = async (selectedUserIds) => {
+    try {
+      const response = await fetch('/api/user');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch users');
+      }
+
+      // Filter the user details based on selectedUserIds and include the current user if needed
+      const usersDetails = data.filter(user => {
+        return selectedUserIds.includes(user.username) || user._id === currentUser._id;
+      });
+
+      return usersDetails;
+    } catch (error) {
+      console.error('Error fetching users:', error.message);
+      setError(error.message);
+      return [];
+    }
+  };
+
+
+
+  const handleDeleteGroup = async (groupId) => {
+    try {
+      console.log('Group ID:', groupId);
+    } catch (error) {
+      console.error('Error deleting group:', error.message);
+
+    }
+  };
+
+  const handleSelectGroup = (group) => {
+    console.log('Selected group:', group);
+    // Implement logic to select a group (e.g., navigate to a different page or component)
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+
   return (
-    <div className="flex justify-between mb-8 w-full">
-      <div className="w-1/2 p-4 border rounded shadow">
-        <h2 className="text-2xl font-bold mb-4">Créer un groupe</h2>
-        <form onSubmit={(e) => e.preventDefault()}>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Nom du groupe</label>
-            <input
-              type="text"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className={`mt-1 p-2 border rounded w-full ${error ? 'border-red-500' : 'border-gray-300'}`}
-            />
+    <div className='max-w-lg mx-auto p-3 w-full'>
+      <h1 className='my-7 text-center font-semibold text-3xl'>Groups</h1>
+      <form onSubmit={handleCreateGroup} className='flex flex-col gap-4'>
+        <TextInput
+          type='text'
+          id='name'
+          placeholder='Group Name'
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <TextInput
+          type='text'
+          id='selectedUsers'
+          placeholder='Enter user IDs separated by commas'
+          value={formData.selectedUsers}
+          onChange={handleChange}
+        />
+        <Button type='submit' gradientDuoTone='greenToBlue' outline>
+          Create Group
+        </Button>
+      </form>
+      <div className='mt-5'>
+        {groups.map(group => (
+          <div key={group._id} className='flex justify-between items-center border-b border-gray-300 py-3'>
+            <div>{group.groupName}</div>
+            <Button gradientDuoTone='greenToBlue' outline onClick={() => handleSelectGroup(group)}>
+              Select
+            </Button>
+            <Button color='failure' onClick={() => handleDeleteGroup(group._id)}>
+              Delete
+            </Button>
           </div>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Membres du groupe (séparés par des virgules)</label>
-            <input
-              type="text"
-              value={groupMembers}
-              onChange={(e) => setGroupMembers(e.target.value)}
-              className={`mt-1 p-2 border rounded w-full ${error ? 'border-red-500' : 'border-gray-300'}`}
-            />
+        ))}
+      </div>
+      {createGroupSuccess && (<Alert color='success' className='mt-2'>{createGroupSuccess}</Alert>)}
+      {createGroupError && (<Alert color='failure' className='mt-2'>{createGroupError}</Alert>)}
+      {error && (<Alert color='failure' className='mt-2'>{error}</Alert>)}
+      <Modal popup size='md' show={showModal} onClose={closeModal}>
+        <Modal.Header />
+        <Modal.Body>
+          <div className='text-center'>
+            <h1 className='font-semibold text-lg'>Are you sure you want to perform this action?</h1>
+            <div className='flex justify-between mt-5'>
+              <Button color='failure' onClick={closeModal}>Cancel</Button>
+              <Button gradientDuoTone='greenToBlue' onClick={closeModal}>Confirm</Button>
+            </div>
           </div>
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <button
-            type="button"
-            onClick={handleCreateGroup}
-            disabled={!groupName || !groupMembers}
-            className={`px-4 py-2 rounded ${(!groupName || !groupMembers) ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          >
-            Créer
-          </button>
-        </form>
-      </div>
-      <div className="w-1/2 p-4 border rounded shadow">
-        <h2 className="text-2xl font-bold mb-4">Mes groupes</h2>
-        <ul>
-          {groups.map((group, index) => (
-            <li key={index} className="mb-2 flex justify-between items-center">
-              <span>{group.name}</span>
-              <button
-                onClick={() => setSelectedGroup(group)}
-                className="px-4 py-2 bg-green-500 text-white rounded"
-              >
-                Sélectionner
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
 
-export default GroupSection;

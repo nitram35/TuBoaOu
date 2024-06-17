@@ -4,6 +4,8 @@ import { errorHandler } from "../utils/error.js";
 
 export const createGroup = async (req, res, next) => {
     try {
+        console.log('Request Body:', req.body);
+
         const { ownerId, groupName, users } = req.body;
 
         // Validate input
@@ -16,7 +18,8 @@ export const createGroup = async (req, res, next) => {
             return next(errorHandler(404, 'Owner not found'));
         }
 
-        const usersWithMail = users.map(user => ({
+        const usersWithData = users.map(user => ({
+            username: user.username,
             email: user.email,
             longitude: user.longitude,
             latitude: user.latitude,
@@ -25,7 +28,7 @@ export const createGroup = async (req, res, next) => {
         const group = new Group({
             ownerId: owner._id,
             groupName,
-            users: usersWithMail,
+            users: usersWithData,
         });
 
         await group.save();
@@ -45,46 +48,11 @@ export const createGroup = async (req, res, next) => {
 //     users: member.mail,
 // }));
 
-export const getGroup = async (req, res, next) => {
+export const getAllGroups = async (req, res, next) => {
     try {
-        const { groupId } = req.params;
-
-        const group = await Group.findById(groupId).populate('owner').populate('members.user');
-        if (!group) {
-            return next(errorHandler(404, 'Group not found'));
-        }
-
-        res.status(200).json(group);
+        const groups = await Group.find();
+        res.status(200).json(groups);
     } catch (error) {
         next(error);
     }
-};
-
-export const updateGroup = async (req, res, next) => {
-    try {
-        const { groupId } = req.params;
-        const updates = req.body;
-
-        const updatedGroup = await Group.findByIdAndUpdate(groupId, updates, { new: true })
-            .populate('owner')
-            .populate('members.user');
-        if (!updatedGroup) {
-            return next(errorHandler(404, 'Group not found'));
-        }
-
-        res.status(200).json(updatedGroup);
-    } catch (error) {
-        next(error);
-    }
-};
-
-export const deleteGroup = async (req, res, next) => {
-    try {
-        const { groupId } = req.params;
-
-        await Group.findByIdAndDelete(groupId);
-        res.status(200).json({ message: 'Group deleted successfully' });
-    } catch (error) {
-        next(error);
-    }
-};
+}
