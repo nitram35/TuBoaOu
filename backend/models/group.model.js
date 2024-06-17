@@ -2,25 +2,35 @@ import mongoose from "mongoose";
 import User from "../models/user.model.js";
 
 const groupSchema = new mongoose.Schema({
-    owner: {
+    ownerId: {
         type: mongoose.Schema.ObjectId,
-        ref: 'User',
+        ref: "User",
         required: true,
     },
     groupName: {
         type: String,
         required: true,
     },
-    members: [{
-        user1: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'User',
+    users: [{
+        // id: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: 'User',
+        // }
+        email: {
+            type: String,
+            required: true,
         },
-        user2: {
-            type: mongoose.Schema.ObjectId,
-            ref: 'User',
+        longitude: {
+            type: Number,
+            required: true,
         },
-    }]
+        latitude: {
+            type: Number,
+            required: true,
+        },
+    }
+    ]
+
 
 }, { timestamps: true });
 

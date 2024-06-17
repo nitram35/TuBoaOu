@@ -4,10 +4,10 @@ import { errorHandler } from "../utils/error.js";
 
 export const createGroup = async (req, res, next) => {
     try {
-        const { ownerId, groupName, memberIds } = req.body;
+        const { ownerId, groupName, users } = req.body;
 
         // Validate input
-        if (!ownerId || !groupName || !Array.isArray(memberIds)) {
+        if (!ownerId || !groupName || !Array.isArray(users)) {
             return next(errorHandler(400, 'Invalid input data'));
         }
 
@@ -16,23 +16,16 @@ export const createGroup = async (req, res, next) => {
             return next(errorHandler(404, 'Owner not found'));
         }
 
-        const members = await User.find({ '_id': { $in: memberIds } });
-        if (members.length !== memberIds.length) {
-            return next(errorHandler(404, 'One or more members not found'));
-        }
-
-        const membersWithCoordinates = members.map(member => ({
-            user: member._id,
-            coordinates: {
-                latitude: member.latitude,
-                longitude: member.longitude,
-            }
+        const usersWithMail = users.map(user => ({
+            email: user.email,
+            longitude: user.longitude,
+            latitude: user.latitude,
         }));
 
         const group = new Group({
-            owner: owner._id,
+            ownerId: owner._id,
             groupName,
-            members: membersWithCoordinates
+            users: usersWithMail,
         });
 
         await group.save();
@@ -41,6 +34,16 @@ export const createGroup = async (req, res, next) => {
         next(error);
     }
 };
+
+// const members = await User.find({ '_id': { $in: users } });
+// // if (members.length !== users.length) {
+// //     return next(errorHandler(404, 'One or more members not found'));
+// // }
+// const members = users;
+
+// const usersWithCoordinates = members.map(member => ({
+//     users: member.mail,
+// }));
 
 export const getGroup = async (req, res, next) => {
     try {
