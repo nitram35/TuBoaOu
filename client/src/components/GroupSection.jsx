@@ -16,6 +16,7 @@ export default function GroupSection() {
     fetchGroups();
 
   }, []);
+
   const fetchGroups = async () => {
     try {
       setLoading(true);
@@ -24,7 +25,11 @@ export default function GroupSection() {
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch groups');
       }
-      setGroups(data);
+
+      // Filter groups where ownerId matches currentUser._id
+      const userGroups = data.filter(group => group.ownerId === currentUser._id);
+
+      setGroups(userGroups);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching groups:', error.message);
