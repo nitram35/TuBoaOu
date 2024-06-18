@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, TextInput, Alert, Modal } from 'flowbite-react';
 import { useSelector } from 'react-redux';
 
@@ -150,7 +150,6 @@ export default function GroupSection() {
 
   const handleSelectGroup = (group) => {
     setSelectedGroupId(group._id); // Set selected group ID for deletion
-    setShowModal(true); // Show deletion confirmation modal
   };
 
   const closeModal = () => {
@@ -188,7 +187,7 @@ export default function GroupSection() {
               <Button gradientDuoTone='greenToBlue' outline onClick={() => handleSelectGroup(group)}>
                 Select
               </Button>
-              <Button color='failure' onClick={() => handleSelectGroup(group)}>
+              <Button color='failure' onClick={() => setShowModal(true)}>
                 Delete
               </Button>
             </div>
