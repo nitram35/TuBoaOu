@@ -86,6 +86,12 @@ export default function Header() {
                         Home
                     </Link>
                 </Navbar.Link>
+                <Navbar.Link active={path === '/dashboard?tab=profile'} as={'div'}>
+                    <Link to={'/dashboard?tab=profile'}>Profile</Link>
+                </Navbar.Link>
+                <Navbar.Link active={path === '/dashboard?tab=group'} as={'div'}>
+                    <Link to={'/dashboard?tab=group'}>Groups</Link>
+                </Navbar.Link>
             </Navbar.Collapse>
         </Navbar >
     )

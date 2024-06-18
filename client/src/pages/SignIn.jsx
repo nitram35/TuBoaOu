@@ -43,7 +43,7 @@ export default function SignIn() {
             // if the response is ok, we redirect to the sign-in pages
             if (res.ok) {
                 dispatch(signInSucceeded(data));
-                navigate('/');
+                navigate('/dashboard');
             }
         } catch (error) {
             // setErrorMessage(error.message)
