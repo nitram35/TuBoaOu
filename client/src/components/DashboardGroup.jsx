@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import GroupSection from '../components/GroupSection';
-import MapSection from '../components//MapSection';
-import BarInfoSection from '../components//BarInfoSection';
+import MapSection from '../components/MapSection';
+import BarInfoSection from '../components/BarInfoSection';
 
 export default function DashboardGroup() {
     const [selectedGroup, setSelectedGroup] = useState(null);

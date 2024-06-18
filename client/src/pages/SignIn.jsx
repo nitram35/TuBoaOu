@@ -27,7 +27,7 @@ export default function SignIn() {
             // setErrorMessage(null);
             dispatch(signInStart());
             // we add a proxy in vite.config.js to be able to reach localhost:3000 (server) and not localhost:5173 (client)
-            const res = await fetch('/api/auth/classicSignin', {
+            const res = await fetch('/api/auth/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
