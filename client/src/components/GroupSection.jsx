@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button, TextInput, Alert, Modal } from 'flowbite-react';
 import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types'; // Import PropTypes
 
-export default function GroupSection() {
+export default function GroupSection({ onSelectGroup }) {
   const [groups, setGroups] = useState([]);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({ name: '', selectedUsers: '' });
@@ -149,7 +150,12 @@ export default function GroupSection() {
   };
 
   const handleSelectGroup = (group) => {
-    setSelectedGroupId(group._id); // Set selected group ID for deletion
+    onSelectGroup(group); // Pass selected group to parent component
+  };
+
+  const openDeleteModal = (groupId) => {
+    setSelectedGroupId(groupId);
+    setShowModal(true);
   };
 
   const closeModal = () => {
@@ -158,7 +164,7 @@ export default function GroupSection() {
   };
 
   return (
-    <div className='max-w-lg mx-auto p-3 w-full'>
+    <div>
       <h1 className='my-7 text-center font-semibold text-3xl'>Groups</h1>
       <form onSubmit={handleCreateGroup} className='flex flex-col gap-4'>
         <TextInput
@@ -187,7 +193,7 @@ export default function GroupSection() {
               <Button gradientDuoTone='greenToBlue' outline onClick={() => handleSelectGroup(group)}>
                 Select
               </Button>
-              <Button color='failure' onClick={() => setShowModal(true)}>
+              <Button color='failure' onClick={() => openDeleteModal(group._id)}>
                 Delete
               </Button>
             </div>
@@ -214,3 +220,8 @@ export default function GroupSection() {
     </div>
   );
 }
+
+// Define PropTypes outside the component function
+GroupSection.propTypes = {
+  onSelectGroup: PropTypes.func.isRequired,
+};

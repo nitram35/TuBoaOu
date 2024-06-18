@@ -1,24 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
 const mapContainerStyle = {
-  height: "400px",
-  width: "100%"
+  height: '400px',
+  width: '100%',
 };
 
-const center = {
-  lat: 48.8566,
-  lng: 2.3522
-};
-
-const bars = [
-  { id: 1, name: 'Bar A', position: { lat: 48.8576, lng: 2.3522 } },
-  { id: 2, name: 'Bar B', position: { lat: 48.8560, lng: 2.3530 } },
-  { id: 3, name: 'Bar C', position: { lat: 48.8550, lng: 2.3540 } },
-];
-
-function MapSection({ selectedGroup, setSelectedBar }) {
+function MapSection({ group, setActiveSection }) {
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [barycenter, setBarycenter] = useState(null);
+
+  useEffect(() => {
+    if (group && group.users.length > 0) {
+      const barycenter = calculateBarycenter(group.users);
+      setBarycenter(barycenter);
+    }
+  }, [group]);
+
+  const calculateBarycenter = (users) => {
+    const totalUsers = users.length;
+    const sumCoordinates = users.reduce(
+      (acc, user) => {
+        acc.longitude += user.longitude;
+        acc.latitude += user.latitude;
+        return acc;
+      },
+      { longitude: 0, latitude: 0 }
+    );
+
+    return {
+      longitude: sumCoordinates.longitude / totalUsers,
+      latitude: sumCoordinates.latitude / totalUsers,
+    };
+  };
 
   const handleBarSelection = () => {
     if (selectedMarker) {
@@ -27,32 +42,50 @@ function MapSection({ selectedGroup, setSelectedBar }) {
   };
 
   return (
-    <div className="mb-8 flex-1 w-full">
-      {selectedGroup && (
-        <>
-          <LoadScript googleMapsApiKey=>
-            <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={15}>
-              {bars.map(bar => (
-                <Marker key={bar.id} position={bar.position} onClick={() => setSelectedMarker(bar)} />
+    <div>
+      <h2>Map Section</h2>
+      <p>Selected Group Name: {group.groupName}</p>
+      <h3>Users:</h3>
+      <ul>
+        {group.users.map(user => (
+          <li key={user._id}>
+            {user.username} - {user.email}
+          </li>
+        ))}
+      </ul>
+      <div id="map" style={{ height: '400px', width: '100%' }}>
+        {barycenter && (
+          <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_API_KEY}>
+            <GoogleMap mapContainerStyle={mapContainerStyle} center={{ lat: barycenter.latitude, lng: barycenter.longitude }} zoom={8}>
+              <Marker position={{ lat: barycenter.latitude, lng: barycenter.longitude }} title="Barycenter" />
+              {group.users.map(user => (
+                <Marker key={user._id} position={{ lat: user.latitude, lng: user.longitude }} />
               ))}
-              {selectedMarker && (
-                <InfoWindow position={selectedMarker.position} onCloseClick={() => setSelectedMarker(null)}>
-                  <div>{selectedMarker.name}</div>
-                </InfoWindow>
-              )}
             </GoogleMap>
           </LoadScript>
-          <button
-            onClick={handleBarSelection}
-            disabled={!selectedMarker}
-            className={`mt-4 px-4 py-2 rounded ${!selectedMarker ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-500 text-white'}`}
-          >
-            Choisir le bar
-          </button>
-        </>
-      )}
+        )}
+      </div>
+      <button onClick={() => setActiveSection('barInfo')}>Show Bar Info</button>
     </div>
   );
 }
+
+MapSection.propTypes = {
+  group: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    ownerId: PropTypes.string.isRequired,
+    groupName: PropTypes.string.isRequired,
+    users: PropTypes.arrayOf(
+      PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        username: PropTypes.string.isRequired,
+        email: PropTypes.string.isRequired,
+        longitude: PropTypes.number.isRequired,
+        latitude: PropTypes.number.isRequired,
+      })
+    ).isRequired,
+  }),
+  setActiveSection: PropTypes.func.isRequired,
+};
 
 export default MapSection;

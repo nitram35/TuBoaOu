@@ -1,20 +1,24 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import GroupSection from '../components/GroupSection';
 import MapSection from '../components/MapSection';
 import BarInfoSection from '../components/BarInfoSection';
 
 export default function DashboardGroup() {
-    const [selectedGroup, setSelectedGroup] = useState(null);
-    const [selectedBar, setSelectedBar] = useState(null);
+    const [activeSection, setActiveSection] = useState('group'); // Initial active section
+    const [selectedGroup, setSelectedGroup] = useState(null); // State to hold selected group info
 
+    // Function to handle selecting a group and showing MapSection
+    const handleSelectGroup = (group) => {
+        setSelectedGroup(group);
+        setActiveSection('map');
+    };
 
     return (
-        <div className="w-full">
-            <div className="container mx-auto p-4 h-screen flex flex-col">
-                <GroupSection setSelectedGroup={setSelectedGroup} />
-                <MapSection selectedGroup={selectedGroup} setSelectedBar={setSelectedBar} />
-                <BarInfoSection selectedBar={selectedBar} />
-            </div>
-        </div>
+        <div className='max-w-lg mx-auto p-3 w-full'>
+            {/* Conditional rendering based on activeSection state */}
+            {activeSection === 'group' && <GroupSection onSelectGroup={handleSelectGroup} />}
+            {activeSection === 'map' && <MapSection group={selectedGroup} setActiveSection={setActiveSection} />}
+            {/* {activeSection === 'barInfo' && <BarInfoSection setActiveSection={setActiveSection} />} */}
+        </div >
     );
 }
