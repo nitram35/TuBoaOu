@@ -1,13 +1,11 @@
 import Group from "../models/group.model.js";
 import User from "../models/user.model.js";
+import { ObjectId } from "mongodb";
 import { errorHandler } from "../utils/error.js";
 
 export const createGroup = async (req, res, next) => {
     try {
-        console.log('Request Body:', req.body);
-
         const { ownerId, groupName, users } = req.body;
-
         // Validate input
         if (!ownerId || !groupName || !Array.isArray(users)) {
             return next(errorHandler(400, 'Invalid input data'));
@@ -55,4 +53,34 @@ export const getAllGroups = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
+
+// Controller function to delete a group by its groupId
+export const deleteGroup = async (req, res, next) => {
+    try {
+        const { groupId } = req.params; // Extract groupId from URL params
+        const currentUserId = req.user.id; // Assuming req.user.id is available from authentication middleware
+
+        // Find the group in MongoDB
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return next(errorHandler(404, 'Group not found'));
+        }
+
+        // Check if current user is the owner of the group
+        if (currentUserId !== group.ownerId.toString()) {
+            return next(errorHandler(403, 'Forbidden to delete this group'));
+        }
+
+        // Delete the group from MongoDB
+        const deletedGroup = await Group.findByIdAndDelete(groupId);
+
+        if (!deletedGroup) {
+            return next(errorHandler(404, 'Group not found'));
+        }
+        res.status(200).json('Group deleted successfully');
+    } catch (error) {
+        console.error('Error deleting group:', error.message);
+        next(error); // Pass the error to the error handling middleware
+    }
+};
