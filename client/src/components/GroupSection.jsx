@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, TextInput, Alert, Modal } from 'flowbite-react';
 import { useSelector } from 'react-redux';
 
@@ -8,13 +8,15 @@ export default function GroupSection() {
   const [formData, setFormData] = useState({ name: '', selectedUsers: '' });
   const [createGroupSuccess, setCreateGroupSuccess] = useState(null);
   const [createGroupError, setCreateGroupError] = useState(null);
+  const [deleteGroupSuccess, setDeleteGroupSuccess] = useState(null);
+  const [deleteGroupError, setDeleteGroupError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { currentUser } = useSelector(state => state.user); // Added to access currentUser from Redux state
+  const [selectedGroupId, setSelectedGroupId] = useState(null); // State to hold the selected group ID
+  const { currentUser } = useSelector(state => state.user);
 
   useEffect(() => {
     fetchGroups();
-
   }, []);
 
   const fetchGroups = async () => {
@@ -101,7 +103,6 @@ export default function GroupSection() {
     }
   };
 
-
   const fetchUsersDetails = async (selectedUserIds) => {
     try {
       const response = await fetch('/api/user');
@@ -123,26 +124,39 @@ export default function GroupSection() {
     }
   };
 
-
-
-  const handleDeleteGroup = async (groupId) => {
+  const handleDeleteGroup = async () => {
     try {
-      console.log('Group ID:', groupId);
+      if (!selectedGroupId) {
+        throw new Error('No group selected for deletion.');
+      }
+
+      const response = await fetch(`/api/group/delete/${selectedGroupId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete group');
+      }
+
+      setGroups(groups.filter(group => group._id !== selectedGroupId));
+      setDeleteGroupSuccess('Group deleted successfully!');
+      setSelectedGroupId(null); // Reset selectedGroupId after deletion
+      setShowModal(false); // Close modal after deletion
     } catch (error) {
       console.error('Error deleting group:', error.message);
-
+      setDeleteGroupError('Failed to delete group. Please try again.');
     }
   };
 
   const handleSelectGroup = (group) => {
-    console.log('Selected group:', group);
-    // Implement logic to select a group (e.g., navigate to a different page or component)
+    setSelectedGroupId(group._id); // Set selected group ID for deletion
+    setShowModal(true); // Show deletion confirmation modal
   };
 
   const closeModal = () => {
     setShowModal(false);
+    setSelectedGroupId(null); // Reset selectedGroupId if modal is closed without deletion
   };
-
 
   return (
     <div className='max-w-lg mx-auto p-3 w-full'>
@@ -169,27 +183,31 @@ export default function GroupSection() {
       <div className='mt-5'>
         {groups.map(group => (
           <div key={group._id} className='flex justify-between items-center border-b border-gray-300 py-3'>
-            <div>{group.groupName}</div>
-            <Button gradientDuoTone='greenToBlue' outline onClick={() => handleSelectGroup(group)}>
-              Select
-            </Button>
-            <Button color='failure' onClick={() => handleDeleteGroup(group._id)}>
-              Delete
-            </Button>
+            {group.groupName}
+            <div className='flex gap-3'>
+              <Button gradientDuoTone='greenToBlue' outline onClick={() => handleSelectGroup(group)}>
+                Select
+              </Button>
+              <Button color='failure' onClick={() => handleSelectGroup(group)}>
+                Delete
+              </Button>
+            </div>
           </div>
         ))}
       </div>
       {createGroupSuccess && (<Alert color='success' className='mt-2'>{createGroupSuccess}</Alert>)}
       {createGroupError && (<Alert color='failure' className='mt-2'>{createGroupError}</Alert>)}
+      {deleteGroupSuccess && (<Alert color='success' className='mt-2'>{deleteGroupSuccess}</Alert>)}
+      {deleteGroupError && (<Alert color='failure' className='mt-2'>{deleteGroupError}</Alert>)}
       {error && (<Alert color='failure' className='mt-2'>{error}</Alert>)}
       <Modal popup size='md' show={showModal} onClose={closeModal}>
         <Modal.Header />
         <Modal.Body>
           <div className='text-center'>
-            <h1 className='font-semibold text-lg'>Are you sure you want to perform this action?</h1>
+            <h1 className='font-semibold text-lg'>Are you sure you want to delete this group?</h1>
             <div className='flex justify-between mt-5'>
               <Button color='failure' onClick={closeModal}>Cancel</Button>
-              <Button gradientDuoTone='greenToBlue' onClick={closeModal}>Confirm</Button>
+              <Button gradientDuoTone='greenToBlue' onClick={handleDeleteGroup}>Confirm</Button>
             </div>
           </div>
         </Modal.Body>
@@ -197,4 +215,3 @@ export default function GroupSection() {
     </div>
   );
 }
-
