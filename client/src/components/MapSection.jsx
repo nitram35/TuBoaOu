@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect , useCallback} from 'react';
 import PropTypes from 'prop-types';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
@@ -7,44 +7,61 @@ const mapContainerStyle = {
   width: '100%',
 };
 
-function MapSection({ group, setActiveSection }) {
-  const [selectedMarker, setSelectedMarker] = useState(null);
-  const [barycenter, setBarycenter] = useState(null);
+function MapSection({ group, onSelectMarker }) {
+  const [barChoice, setBarChoice] = useState();
 
-  useEffect(() => {
-    if (group && group.users.length > 0) {
-      const barycenter = calculateBarycenter(group.users);
-      setBarycenter(barycenter);
-    }
-  }, [group]);
-
-  const calculateBarycenter = (users) => {
-    const totalUsers = users.length;
-    const sumCoordinates = users.reduce(
-      (acc, user) => {
-        acc.longitude += user.longitude;
-        acc.latitude += user.latitude;
-        return acc;
-      },
-      { longitude: 0, latitude: 0 }
-    );
-
-    return {
-      longitude: sumCoordinates.longitude / totalUsers,
-      latitude: sumCoordinates.latitude / totalUsers,
-    };
+  const barycenter = {
+    lat: group.meanCoordinates.latitude,
+    lng: group.meanCoordinates.longitude
   };
+  
+  const [markers, setMarkers] = useState([]);
+
+  const fetchPlaces = useCallback((map) => {
+    const service = new window.google.maps.places.PlacesService(map);
+    const request = {
+      location: barycenter,
+      radius: '1500',
+      type: ['bar']
+    };
+
+    service.nearbySearch(request, (results, status) => {
+      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+        const newMarkers = results.map(place => ({
+          position: place.geometry.location,
+          name: place.name
+        }));
+        setMarkers(newMarkers);
+      }
+    });
+  }, []);
+
+  const onLoad = useCallback((map) => {
+    fetchPlaces(map);
+  }, [fetchPlaces]);
 
   const handleBarSelection = () => {
-    if (selectedMarker) {
-      setSelectedBar(selectedMarker);
-    }
+    setSelectedBar(selectedMarker);
+  };
+
+  const green = {
+    url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+  };
+
+  const blue = {
+    url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+  };
+
+  const red = {
+    url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
   };
 
   return (
     <div>
-      <h2>Map Section</h2>
+      <h1 className='my-7 text-center font-semibold text-3xl'>Map Section</h1>
       <p>Selected Group Name: {group.groupName}</p>
+      <p>Selected Group latitude: {barycenter.lat}</p>
+      <p>Selected Group longitude: {barycenter.lng}</p>
       <h3>Users:</h3>
       <ul>
         {group.users.map(user => (
@@ -55,17 +72,26 @@ function MapSection({ group, setActiveSection }) {
       </ul>
       <div id="map" style={{ height: '400px', width: '100%' }}>
         {barycenter && (
-          <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_API_KEY}>
-            <GoogleMap mapContainerStyle={mapContainerStyle} center={{ lat: barycenter.latitude, lng: barycenter.longitude }} zoom={8}>
-              <Marker position={{ lat: barycenter.latitude, lng: barycenter.longitude }} title="Barycenter" />
+          <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_API_KEY } libraries={['places']}>
+            <GoogleMap mapContainerStyle={mapContainerStyle} center={{ lat: barycenter.lat, lng: barycenter.lng }} zoom={13} onLoad={onLoad}>
+              {markers.map((marker, index) => (
+                <Marker key={index} position={marker.position} title={marker.name} icon={red} onClick={() => setBarChoice(marker)}/>
+              ))}
+
+              {barChoice && (
+                <InfoWindow position={barChoice.position} onCloseClick={() => setSelectedMarker(null)}>
+                  <div>{barChoice.name}</div>
+                </InfoWindow>
+              )}
+              <Marker position={{ lat: barycenter.lat, lng: barycenter.lng }} title="Barycenter" icon={green}/>
               {group.users.map(user => (
-                <Marker key={user._id} position={{ lat: user.latitude, lng: user.longitude }} />
+                <Marker key={user._id} position={{ lat: user.latitude, lng: user.longitude }} icon={blue}/>
               ))}
             </GoogleMap>
           </LoadScript>
         )}
       </div>
-      <button onClick={() => setActiveSection('barInfo')}>Show Bar Info</button>
+      <button onClick={() => onSelectMarker(barChoice)}>Show {barChoice && (barChoice.name) || "'Select a bar'"} Info</button>
     </div>
   );
 }
@@ -85,7 +111,7 @@ MapSection.propTypes = {
       })
     ).isRequired,
   }),
-  setActiveSection: PropTypes.func.isRequired,
+  onSelectMarker: PropTypes.func.isRequired,
 };
 
 export default MapSection;
