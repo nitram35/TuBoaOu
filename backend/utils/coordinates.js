@@ -1,19 +1,23 @@
-export const calculateMeanCoordinates = (users) => {
-    if (!Array.isArray(users) || users.length === 0) {
-        throw new Error('Invalid users array');
+export const calculateMeanCoordinates = (data, longitudeKey, latitudeKey) => {
+    if (!Array.isArray(data) || data.length === 0) {
+        throw new Error('Invalid data array');
     }
 
-    const totalCoordinates = users.reduce((acc, user) => {
-        if (typeof user.longitude !== 'number' || typeof user.latitude !== 'number') {
+    // Calculate mean longitude and latitude
+    const totalCoordinates = data.reduce((acc, item) => {
+        // Ensure item has both longitude and latitude properties
+        if (typeof item[longitudeKey] !== 'number' || typeof item[latitudeKey] !== 'number') {
             throw new Error('Invalid coordinate values');
         }
-        acc.longitude += user.longitude;
-        acc.latitude += user.latitude;
-        return acc;
+
+        return {
+            longitude: acc.longitude + item[longitudeKey],
+            latitude: acc.latitude + item[latitudeKey],
+        };
     }, { longitude: 0, latitude: 0 });
 
-    const meanLongitude = totalCoordinates.longitude / users.length;
-    const meanLatitude = totalCoordinates.latitude / users.length;
+    const meanLongitude = totalCoordinates.longitude / data.length;
+    const meanLatitude = totalCoordinates.latitude / data.length;
 
     return { meanLongitude, meanLatitude };
 };

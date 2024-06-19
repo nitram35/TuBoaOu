@@ -9,7 +9,7 @@ export const createGroup = async (req, res, next) => {
         const { ownerId, groupName, users } = req.body;
 
         // Validate input
-        if (!ownerId || !groupName || !Array.isArray(users)) {
+        if (!ownerId || !groupName || !Array.isArray(users) || users.length === 0) {
             return next(errorHandler(400, 'Invalid input data'));
         }
 
@@ -18,6 +18,7 @@ export const createGroup = async (req, res, next) => {
             return next(errorHandler(404, 'Owner not found'));
         }
 
+        // Extract relevant data and calculate mean coordinates
         const usersWithData = users.map(user => ({
             username: user.username,
             email: user.email,
@@ -25,9 +26,9 @@ export const createGroup = async (req, res, next) => {
             latitude: user.latitude,
         }));
 
-        // Calculate the mean coordinates
-        const { meanLongitude, meanLatitude } = calculateMeanCoordinates(usersWithData);
+        const { meanLongitude, meanLatitude } = calculateMeanCoordinates(usersWithData, 'longitude', 'latitude');
 
+        // Create new Group instance
         const group = new Group({
             ownerId: owner._id,
             groupName,
@@ -38,12 +39,16 @@ export const createGroup = async (req, res, next) => {
             }
         });
 
+        // Save the group to the database
         await group.save();
+
+        // Respond with the created group
         res.status(201).json(group);
     } catch (error) {
         next(error);
     }
 };
+
 
 
 // export const createGroup = async (req, res, next) => {
