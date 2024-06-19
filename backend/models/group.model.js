@@ -29,7 +29,16 @@ const groupSchema = new mongoose.Schema({
             required: true,
         },
     }
-    ]
+    ],
+    meanCoordinates: {
+        longitude: {
+            type: Number,
+
+        },
+        latitude: {
+            type: Number,
+        }
+    }
 
 
 }, { timestamps: true });

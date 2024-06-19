@@ -2,10 +2,12 @@ import Group from "../models/group.model.js";
 import User from "../models/user.model.js";
 import { ObjectId } from "mongodb";
 import { errorHandler } from "../utils/error.js";
+import { calculateMeanCoordinates } from "../utils/coordinates.js";
 
 export const createGroup = async (req, res, next) => {
     try {
         const { ownerId, groupName, users } = req.body;
+
         // Validate input
         if (!ownerId || !groupName || !Array.isArray(users)) {
             return next(errorHandler(400, 'Invalid input data'));
@@ -23,10 +25,17 @@ export const createGroup = async (req, res, next) => {
             latitude: user.latitude,
         }));
 
+        // Calculate the mean coordinates
+        const { meanLongitude, meanLatitude } = calculateMeanCoordinates(usersWithData);
+
         const group = new Group({
             ownerId: owner._id,
             groupName,
             users: usersWithData,
+            meanCoordinates: {
+                longitude: meanLongitude,
+                latitude: meanLatitude
+            }
         });
 
         await group.save();
@@ -35,6 +44,40 @@ export const createGroup = async (req, res, next) => {
         next(error);
     }
 };
+
+
+// export const createGroup = async (req, res, next) => {
+//     try {
+//         const { ownerId, groupName, users } = req.body;
+//         // Validate input
+//         if (!ownerId || !groupName || !Array.isArray(users)) {
+//             return next(errorHandler(400, 'Invalid input data'));
+//         }
+
+//         const owner = await User.findById(ownerId);
+//         if (!owner) {
+//             return next(errorHandler(404, 'Owner not found'));
+//         }
+
+//         const usersWithData = users.map(user => ({
+//             username: user.username,
+//             email: user.email,
+//             longitude: user.longitude,
+//             latitude: user.latitude,
+//         }));
+
+//         const group = new Group({
+//             ownerId: owner._id,
+//             groupName,
+//             users: usersWithData,
+//         });
+
+//         await group.save();
+//         res.status(201).json(group);
+//     } catch (error) {
+//         next(error);
+//     }
+// };
 
 // const members = await User.find({ '_id': { $in: users } });
 // // if (members.length !== users.length) {
