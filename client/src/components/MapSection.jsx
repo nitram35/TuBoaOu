@@ -1,4 +1,5 @@
 import React, { useState, useEffect , useCallback} from 'react';
+import { Button, TextInput, Alert, Modal } from 'flowbite-react';
 import PropTypes from 'prop-types';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
@@ -7,7 +8,7 @@ const mapContainerStyle = {
   width: '100%',
 };
 
-function MapSection({ group, onSelectMarker }) {
+function MapSection({ group, onSelectMarker, setSelectedMarker }) {
   const [barChoice, setBarChoice] = useState();
 
   const barycenter = {
@@ -29,7 +30,8 @@ function MapSection({ group, onSelectMarker }) {
       if (status === window.google.maps.places.PlacesServiceStatus.OK) {
         const newMarkers = results.map(place => ({
           position: place.geometry.location,
-          name: place.name
+          name: place.name,
+          place: place
         }));
         setMarkers(newMarkers);
       }
@@ -41,7 +43,8 @@ function MapSection({ group, onSelectMarker }) {
   }, [fetchPlaces]);
 
   const handleBarSelection = () => {
-    setSelectedBar(selectedMarker);
+    setSelectedMarker(null)
+    setBarChoice(null);
   };
 
   const green = {
@@ -79,7 +82,7 @@ function MapSection({ group, onSelectMarker }) {
               ))}
 
               {barChoice && (
-                <InfoWindow position={barChoice.position} onCloseClick={() => setSelectedMarker(null)}>
+                <InfoWindow position={barChoice.position} onCloseClick={() => handleBarSelection()}>
                   <div>{barChoice.name}</div>
                 </InfoWindow>
               )}
@@ -91,7 +94,7 @@ function MapSection({ group, onSelectMarker }) {
           </LoadScript>
         )}
       </div>
-      <button onClick={() => onSelectMarker(barChoice)}>Show {barChoice && (barChoice.name) || "'Select a bar'"} Info</button>
+      <Button gradientDuoTone='greenToBlue' outline onClick={() => onSelectMarker(barChoice)}>Show {barChoice && (barChoice.name) || "'Select a bar'"} Info</Button>
     </div>
   );
 }
@@ -112,6 +115,7 @@ MapSection.propTypes = {
     ).isRequired,
   }),
   onSelectMarker: PropTypes.func.isRequired,
+  setSelectedMarker: PropTypes.func.isRequired,
 };
 
 export default MapSection;
