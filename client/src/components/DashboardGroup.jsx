@@ -23,8 +23,8 @@ export default function DashboardGroup() {
         <div className='max-w-lg mx-auto p-3 w-full'>
             {/* Conditional rendering based on activeSection state */}
             {activeSection === 'group' && <GroupSection onSelectGroup={handleSelectGroup} />}
-            {activeSection === 'map' && <MapSection group={selectedGroup} onSelectMarker={handleSelectMarker} />}
-            {activeSection === 'barInfo' && <BarInfoSection marker={selectedMarker} />}
+            {activeSection === 'map' && <MapSection group={selectedGroup} onSelectMarker={handleSelectMarker} setSelectedMarker={setSelectedMarker}/>}
+            {activeSection === 'barInfo' && <BarInfoSection group={selectedGroup} onSelectGroup={handleSelectGroup} marker={selectedMarker} />}
         </div >
     );
 }
