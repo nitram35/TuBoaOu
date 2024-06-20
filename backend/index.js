@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.route.js';
 import groupRoutes from './routes/group.route.js';
 import cookieParser from 'cookie-parser';
 import coordinatesRoutes from './routes/coordinates.route.js';
+import barRoutes from './routes/bar.route.js';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/group', groupRoutes);
 app.use('/api/coordinates', coordinatesRoutes);
+app.use('/api/bar', barRoutes);
 
 // middleware to handle errors
 app.use((err, req, res, next) => {
