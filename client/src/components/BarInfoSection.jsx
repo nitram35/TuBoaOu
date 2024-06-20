@@ -105,7 +105,6 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
           <div className="space-y-2">
             <p className="text-lg"><strong>Nom:</strong> {marker.name}</p>
             <p className="text-lg"><strong>Adresse:</strong> {marker.place.vicinity}</p>
-            <p className="text-lg"><strong>Disponible:</strong> {marker.place.opening_hours.open_now ? "Ouvert" : "Fermé"}</p>
             <p className="text-lg"><strong>Note et avis:</strong> {marker.place.rating} pour {marker.place.user_ratings_total} avis</p>
           </div>
         ) : (
