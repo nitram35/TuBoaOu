@@ -1,10 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Alert } from 'flowbite-react';
 import PropTypes from 'prop-types';
 
 function BarInfoSection({ group, onSelectGroup, marker }) {
   const [error, setError] = useState(null); // State for error message
   const [successMessage, setSuccessMessage] = useState(null); // State for success message
+  const [choose, setChoose] = useState(null); // State for error message
+
+  const [title, setTitle] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [description, setDescription] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+
+  const recipientsString = group.users.map(user => user.email).join(', ');
+
+  const mailtoLink = `mailto:${recipientsString}?subject=${title}&body=${emailBody}`;
 
   const handleChooseBar = async () => {
     const { name, place, position } = marker;
@@ -39,6 +50,17 @@ function BarInfoSection({ group, onSelectGroup, marker }) {
     }
   };
 
+  const handleCreateEvent = {
+
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleChooseBar();
+    handleCreateEvent();
+    setEmailBody();
+  };
+
   return (
     <div className="p-6 bg-gray-50 rounded-lg shadow-md">
       <div className="mb-6">
@@ -69,9 +91,72 @@ function BarInfoSection({ group, onSelectGroup, marker }) {
         )}
       </div>
       <div className="mt-6 space-y-4">
-        <Button gradientDuoTone="greenToBlue" outline onClick={() => alert('Share the bar to Group action')}>Choose this bar</Button>
-        <Button gradientDuoTone="greenToBlue" outline onClick={handleChooseBar}>Share the bar to Group</Button>
+        <Button gradientDuoTone="greenToBlue" outline onClick={() => setChoose(marker)}>Choose this bar</Button>
       </div>
+      {choose ? (
+           <form onSubmit={handleSubmit} className="space-y-4">
+           <div>
+               <label htmlFor="title" className="block text-sm font-medium text-gray-700">Titre</label>
+               <input
+                   type="text"
+                   id="title"
+                   value={marker.name}
+                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                   onChange={(e) => setTitle(e.target.value)}
+                   required
+               />
+           </div>
+           <div>
+               <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">Date/Horaire de début</label>
+               <input
+                   type="datetime-local"
+                   id="startDate"
+                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                   onChange={(e) => setStartDate(e.target.value)}
+                   required
+               />
+           </div>
+           <div>
+               <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">Date/Horaire de fin</label>
+               <input
+                   type="datetime-local"
+                   id="endDate"
+                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                   onChange={(e) => setEndDate(e.target.value)}
+                   required
+               />
+           </div>
+           <div>
+               <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+               <textarea
+                   id="description"
+                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                   rows="3"
+                   onChange={(e) => setDescription(e.target.value)}
+                   required
+               ></textarea>
+           </div>
+           <div>
+               <label htmlFor="location" className="block text-sm font-medium text-gray-700">Adresse</label>
+               <input
+                   type="text"
+                   id="location"
+                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                   value={marker.place.vicinity}
+                   onChange={(e) => setLocation(e.target.value)}
+                   required
+               />
+           </div>
+           <div className="text-right">
+            <Button type="submit" gradientDuoTone="greenToBlue" outline>Créer l'évenement</Button>
+           </div>
+       </form>
+        ) : (
+          <p className="text-lg">Aucun bar sélectionné</p>
+        )}
+        <a href={mailtoLink}>
+          <Button type="submit" gradientDuoTone="greenToBlue" outline>Partager l'évenement</Button>
+        </a>
       {error && <Alert color='failure' className='mt-2'>{error}</Alert>}
       {successMessage && <Alert color='success' className='mt-2'>{successMessage}</Alert>}
     </div>
