@@ -72,7 +72,6 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
       if (!response.ok) {
         throw new Error('Failed to create event');
       } else {
-        console.log(data);
         setSuccessMessage('Event created successfully! You can share it now!');
         setEmailBody(emailBody + data.links.event_page);
       }
