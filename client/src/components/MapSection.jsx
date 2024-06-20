@@ -9,7 +9,9 @@ const mapContainerStyle = {
 };
 
 function MapSection({ group, onSelectMarker, setSelectedMarker }) {
-  const [barChoice, setBarChoice] = useState(null);
+  const [selectedBar, setSelectedBar] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const barycenter = {
     lat: group.meanCoordinates.latitude,
     lng: group.meanCoordinates.longitude
@@ -17,6 +19,7 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
   const [markers, setMarkers] = useState([]);
 
   const fetchPlaces = useCallback((map) => {
+    setLoading(true);
     const service = new window.google.maps.places.PlacesService(map);
     const request = {
       location: barycenter,
@@ -25,6 +28,7 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
     };
 
     service.nearbySearch(request, (results, status) => {
+      setLoading(false);
       if (status === window.google.maps.places.PlacesServiceStatus.OK) {
         const newMarkers = results.map(place => ({
           position: place.geometry.location,
@@ -32,6 +36,8 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
           place: place
         }));
         setMarkers(newMarkers);
+      } else {
+        setError('Failed to fetch places. Please try again later.');
       }
     });
   }, [barycenter]);
@@ -41,19 +47,19 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
   }, [fetchPlaces]);
 
   const handleBarSelection = () => {
+    setSelectedBar(null);
     setSelectedMarker(null);
-    setBarChoice(null);
   };
 
-  const greenIcon = {
+  const barycenterIcon = {
     url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
   };
 
-  const blueIcon = {
+  const usersHomeIcon = {
     url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
   };
 
-  const redIcon = {
+  const barIcon = {
     url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
   };
 
@@ -76,6 +82,8 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
         </ul>
       </div>
       <div id="map" className="mb-4" style={{ height: '400px', width: '100%' }}>
+        {loading && <p>Loading...</p>}
+        {error && <p>{error}</p>}
         {barycenter && (
           <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_API_KEY} libraries={['places']}>
             <GoogleMap
@@ -89,29 +97,29 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
                   key={index}
                   position={marker.position}
                   title={marker.name}
-                  icon={redIcon}
-                  onClick={() => setBarChoice(marker)}
+                  icon={barIcon}
+                  onClick={() => setSelectedBar(marker)}
                 />
               ))}
 
-              {barChoice && (
+              {selectedBar && (
                 <InfoWindow
-                  position={barChoice.position}
+                  position={selectedBar.position}
                   onCloseClick={handleBarSelection}
                 >
-                  <div>{barChoice.name}</div>
+                  <div>{selectedBar.name}</div>
                 </InfoWindow>
               )}
               <Marker
                 position={{ lat: barycenter.lat, lng: barycenter.lng }}
                 title="Barycenter"
-                icon={greenIcon}
+                icon={barycenterIcon}
               />
               {group.users.map(user => (
                 <Marker
                   key={user._id}
                   position={{ lat: user.latitude, lng: user.longitude }}
-                  icon={blueIcon}
+                  icon={usersHomeIcon}
                 />
               ))}
             </GoogleMap>
@@ -122,9 +130,9 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
         <Button
           gradientDuoTone="greenToBlue"
           outline
-          onClick={() => onSelectMarker(barChoice)}
+          onClick={() => onSelectMarker(selectedBar)}
         >
-          {barChoice ? `Show ${barChoice.name} Info` : 'Select a bar'}
+          {selectedBar ? `Show ${selectedBar.name} Info` : 'Select a bar'}
         </Button>
       </div>
     </div>

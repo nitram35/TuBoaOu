@@ -1,12 +1,43 @@
-import React, { useEffect } from 'react';
-import { Button } from 'flowbite-react';
+import React, { useState } from 'react';
+import { Button, Alert } from 'flowbite-react';
 import PropTypes from 'prop-types';
 
 function BarInfoSection({ group, onSelectGroup, marker }) {
+  const [error, setError] = useState(null); // State for error message
+  const [successMessage, setSuccessMessage] = useState(null); // State for success message
 
-  useEffect(() => {
-    console.log(marker.place);
-  }, [marker]);
+  const handleChooseBar = async () => {
+    const { name, place, position } = marker;
+
+    const data = {
+      name,
+      address: place.vicinity,
+      position: {
+        latitude: position.lat(),
+        longitude: position.lng()
+      }
+    };
+
+    try {
+      const response = await fetch(`/api/bar/addOrUpdateBar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to choose bar');
+      }
+
+      setSuccessMessage('Bar chosen successfully!');
+      // Optionally, you can trigger any state updates or UI changes here
+    } catch (error) {
+      console.error('Error choosing bar:', error);
+      setError('Failed to choose bar. Please try again.');
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-50 rounded-lg shadow-md">
@@ -38,9 +69,11 @@ function BarInfoSection({ group, onSelectGroup, marker }) {
         )}
       </div>
       <div className="mt-6 space-y-4">
-        <Button gradientDuoTone="greenToBlue" outline onClick={() => alert('Choose this bar action')}>Choose this bar</Button>
-        <Button gradientDuoTone="greenToBlue" outline onClick={() => alert('Share the bar to Group action')}>Share the bar to Group</Button>
+        <Button gradientDuoTone="greenToBlue" outline onClick={() => alert('Share the bar to Group action')}>Choose this bar</Button>
+        <Button gradientDuoTone="greenToBlue" outline onClick={handleChooseBar}>Share the bar to Group</Button>
       </div>
+      {error && <Alert color='failure' className='mt-2'>{error}</Alert>}
+      {successMessage && <Alert color='success' className='mt-2'>{successMessage}</Alert>}
     </div>
   );
 }
@@ -62,7 +95,9 @@ BarInfoSection.propTypes = {
   }),
   onSelectGroup: PropTypes.func.isRequired,
   marker: PropTypes.shape({
+    _id: PropTypes.string,
     name: PropTypes.string,
+    address: PropTypes.string,
     position: PropTypes.shape({
       lat: PropTypes.func,
       lng: PropTypes.func,
@@ -80,7 +115,7 @@ BarInfoSection.propTypes = {
         })
       ),
     }),
-  }).isRequired,
+  }),
 };
 
 export default BarInfoSection;
