@@ -92,6 +92,11 @@ export default function Header() {
                 <Navbar.Link active={path === '/dashboard?tab=group'} as={'div'}>
                     <Link to={'/dashboard?tab=group'}>Groups</Link>
                 </Navbar.Link>
+                <Navbar.Link active={path === '/dashboard-bar'} as={'div'}>
+                    <Link to='/dashboard-bar'>
+                        Bar ?
+                    </Link>
+                </Navbar.Link>
             </Navbar.Collapse>
         </Navbar >
     )

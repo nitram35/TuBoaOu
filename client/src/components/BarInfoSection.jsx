@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Alert } from 'flowbite-react';
 import PropTypes from 'prop-types';
 
@@ -6,18 +6,19 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
   const [error, setError] = useState(null); // State for error message
   const [successMessage, setSuccessMessage] = useState(null); // State for success message
   const [choose, setChoose] = useState(null); // State for error message
+  const [isCreatingEvent, setIsCreatingEvent] = useState(true); // State for tracking event creation status
 
   const [title, setTitle] = useState(marker.name);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [description, setDescription] = useState('');
-  const [emailBody, setEmailBody] = useState('Bonjour, je vous invite à rejoindre mon événement sur Calndr.link. Voici le lien pour plus d\'informations :');
+  const [emailBody, setEmailBody] = useState('Bonjour, je vous invite à rejoindre mon événement. Voici le lien pour plus d\'informations :');
 
   const recipientsString = group.users.map(user => user.email).join(', ');
 
   const mailtoLink = `mailto:${recipientsString}?subject=${title}&body=${emailBody}`;
 
-  const handleChooseBar = async () => {
+  const addOrUpdateBarInDb = async () => {
     const { name, place, position } = marker;
 
     const data = {
@@ -42,15 +43,15 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
         throw new Error('Failed to choose bar');
       }
 
-      setSuccessMessage('Bar chosen successfully!');
-      // Optionally, you can trigger any state updates or UI changes here
+      setSuccessMessage('Bar shared successfully!');
     } catch (error) {
       console.error('Error choosing bar:', error);
-      setError('Failed to choose bar. Please try again.');
+      setError('Failed to share bar. Please try again.');
     }
   };
 
   const handleCreateEvent = async () => {
+    setIsCreatingEvent(true);
     const formData = {
       title: title,
       start: startDate,
@@ -66,27 +67,31 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
         },
         body: JSON.stringify(formData),
       });
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error('Failed to create event');
-        // setUpdateUserError(data.message);
       } else {
         console.log(data);
-        setSuccessMessage('Event create successfully!');
+        setSuccessMessage('Event created successfully! You can share it now!');
         setEmailBody(emailBody + data.links.event_page);
       }
-
     } catch (error) {
       console.error('Error creating the event:', error);
-      setError('Failed to create the. Please try again.');
+      setError('Failed to create the event. Please try again.');
     }
-  }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleChooseBar();
     handleCreateEvent();
+    setIsCreatingEvent(false);
+  };
+
+  const handleShareEvent = (e) => {
+    e.preventDefault();
+    addOrUpdateBarInDb();
+    window.open(mailtoLink, '_blank');
   };
 
   return (
@@ -99,7 +104,6 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
         {marker ? (
           <div className="space-y-2">
             <p className="text-lg"><strong>Nom:</strong> {marker.name}</p>
-            <p className="text-lg"><strong>Position:</strong> {marker.position.lat()}, {marker.position.lng()}</p>
             <p className="text-lg"><strong>Adresse:</strong> {marker.place.vicinity}</p>
             <p className="text-lg"><strong>Disponible:</strong> {marker.place.opening_hours.open_now ? "Ouvert" : "Fermé"}</p>
             <p className="text-lg"><strong>Note et avis:</strong> {marker.place.rating} pour {marker.place.user_ratings_total} avis</p>
@@ -175,15 +179,17 @@ export default function BarInfoSection({ group, onSelectGroup, marker }) {
             />
           </div>
           <div className="text-right">
-            <Button type="submit" gradientDuoTone="greenToBlue" outline>Créer l'évenement</Button>
+            <Button type="submit" gradientDuoTone="greenToBlue" outline>Créer l&apos;évenement</Button>
           </div>
         </form>
       ) : (
         <p className="text-lg">Aucun bar sélectionné</p>
       )}
-      <a href={mailtoLink}>
-        <Button type="submit" gradientDuoTone="greenToBlue" outline>Partager l'évenement</Button>
-      </a>
+      <div className='flex mt-1'>
+        <Button type="button" gradientDuoTone="greenToBlue" outline onClick={handleShareEvent} disabled={isCreatingEvent}>
+          Partager l&apos;évenement
+        </Button>
+      </div>
       {error && <Alert color='failure' className='mt-2'>{error}</Alert>}
       {successMessage && <Alert color='success' className='mt-2'>{successMessage}</Alert>}
     </div>

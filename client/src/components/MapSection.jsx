@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Alert, Modal } from 'flowbite-react';
+import { useState, useCallback } from 'react';
+import { Button } from 'flowbite-react';
 import PropTypes from 'prop-types';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 
@@ -23,7 +23,7 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
     const service = new window.google.maps.places.PlacesService(map);
     const request = {
       location: barycenter,
-      radius: '1500',
+      radius: '500',
       type: ['bar']
     };
 

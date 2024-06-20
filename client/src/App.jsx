@@ -6,6 +6,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Dashboard from './pages/Dashboard'
 import PrivateRoute from './components/PrivateRoute'
+import DashboardBar from './pages/DashboardBar'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route element={<PrivateRoute />} >
           <Route path='/dashboard' element={<Dashboard />} />
         </Route>
+        <Route path='/dashboard-bar' element={<DashboardBar />}></Route>
       </Routes>
       <Footer />
     </BrowserRouter>
