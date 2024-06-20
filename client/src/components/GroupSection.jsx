@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, TextInput, Alert, Modal } from 'flowbite-react';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types'; // Import PropTypes
@@ -177,7 +177,7 @@ export default function GroupSection({ onSelectGroup }) {
         <TextInput
           type='text'
           id='selectedUsers'
-          placeholder='Enter user IDs separated by commas'
+          placeholder='Enter usernames separated by commas'
           value={formData.selectedUsers}
           onChange={handleChange}
         />
