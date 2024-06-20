@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import PropTypes from 'prop-types';
 import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
@@ -54,7 +54,6 @@ function MapSection({ group, onSelectMarker, setSelectedMarker }) {
         method: 'GET',
       });
       const data = await response.json()
-      console.log(data);
 
       if (!response.ok) {
         throw new Error('Failed to get meteo');
